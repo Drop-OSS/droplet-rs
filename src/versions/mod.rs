@@ -33,9 +33,13 @@ const SUPPORTED_FILE_EXTENSIONS: [&'static str; 11] = [
 ];
 
 pub mod types;
-pub fn create_backend_constructor<'a>(
-    path: &Path,
-) -> Option<Box<dyn FnOnce() -> Result<Box<dyn VersionBackend + Send + Sync + 'a>>>> {
+pub fn create_backend_constructor<'a, P>(
+    path: P,
+) -> Option<Box<dyn FnOnce() -> Result<Box<dyn VersionBackend + Send + Sync + 'a>>>>
+where
+    P: AsRef<Path>,
+{
+    let path = path.as_ref();
     if !path.exists() {
         return None;
     }
@@ -48,10 +52,7 @@ pub fn create_backend_constructor<'a>(
         }));
     };
 
-    let file_extension = path
-        .extension()
-        .map(|v| v.to_str())
-        .flatten()?;
+    let file_extension = path.extension().map(|v| v.to_str()).flatten()?;
 
     if SUPPORTED_FILE_EXTENSIONS
         .iter()
